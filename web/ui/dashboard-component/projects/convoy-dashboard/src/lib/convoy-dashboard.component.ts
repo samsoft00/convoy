@@ -75,11 +75,17 @@ export class ConvoyDashboardComponent implements OnInit {
 	activeGroup!: string;
 	allEventdeliveriesChecked = false;
 	eventDeliveryStatuses = ['Success', 'Failure', 'Retry', 'Scheduled', 'Processing', 'Discarded'];
+	dateOptions = ['Last Year', 'Last Month', 'Last Week', 'Yesterday'];
 	eventDeliveryFilteredByStatus: string[] = [];
 	showOverlay = false;
+	showBatchRetryModal = false;
 	showEventDeliveriesStatusDropdown = false;
 	showEventDeliveriesAppsDropdown = false;
 	showEventsAppsDropdown = false;
+	showDateFilterDropdown = false;
+	showBatchRetryDateFilterDropdown = false;
+	showBatchRetryEventDeliveriesAppsDropdown = false;
+	showBatchRetryEventsAppsDropdown = false;
 	loadingAppPotalToken = false;
 	@Input('apiURL') apiURL: string = '';
 	@Input('isCloud') isCloud: boolean = false;
@@ -96,6 +102,8 @@ export class ConvoyDashboardComponent implements OnInit {
 	isloadingMoreApps = false;
 	isloadingDeliveryAttempt = false;
 	appsSearchString = '';
+	selectedEventsDateOption = '';
+	selectedEventDeliveriesDateOption = '';
 	eventsAppsFilter$!: Observable<APP[]>;
 	eventsDelAppsFilter$!: Observable<APP[]>;
 	@ViewChild('eventsAppsFilter', { static: true }) eventsAppsFilter!: ElementRef;
@@ -642,6 +650,7 @@ export class ConvoyDashboardComponent implements OnInit {
 				filterItems = ['eventsStartDate', 'eventsEndDate', 'eventsApp'];
 				this.eventsFilterDateRange.patchValue({ startDate: '', endDate: '' });
 				this.getEvents({ fromFilter: true });
+				this.selectedEventsDateOption = ''
 				break;
 
 			case 'event deliveries':
@@ -651,6 +660,7 @@ export class ConvoyDashboardComponent implements OnInit {
 				this.eventDeliveryFilteredByEventId = '';
 				this.eventDeliveryFilteredByStatus = [];
 				this.getEventDeliveries({ fromFilter: true });
+				this.selectedEventDeliveriesDateOption = ''
 				break;
 
 			default:
