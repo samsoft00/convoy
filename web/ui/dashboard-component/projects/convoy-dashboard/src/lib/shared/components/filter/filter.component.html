@@ -1,0 +1,97 @@
+<div class="width__100 flex flex__align-items-center flex__justify-between">
+	<div class="flex">
+		<button
+			class="button button__filter without-margin button--has-icon icon-right icon-left"
+			(click)="eventDeliveriesFilterPicker.open()"
+			[ngClass]="{ active: filterEventDeliveriesFilterDateRange.value.startDate !== '' && filterEventDeliveriesFilterDateRange.value.endDate !== '' }"
+			(click)="showEventFilterCalendar = !showEventFilterCalendar"
+		>
+			<img src="/assets/img/calendar-icon.svg" alt="calender icon" />
+			<mat-date-range-input [formGroup]="filterEventDeliveriesFilterDateRange" [rangePicker]="eventDeliveriesFilterPicker">
+				<input matStartDate formControlName="startDate" placeholder="Start date" />
+				<input matEndDate formControlName="endDate" placeholder="End date" (dateChange)="filterData()" />
+			</mat-date-range-input>
+			<mat-date-range-picker #eventDeliveriesFilterPicker [disabled]="false"></mat-date-range-picker>
+			<img src="/assets/img/angle-arrow-down.svg" alt="arrow down icon" />
+		</button>
+
+		<div class="dropdown">
+			<button
+				class="button button__filter button--has-icon icon-right icon-left"
+				[ngClass]="{ active: eventDeliveryFilteredByStatus.length > 0 }"
+				(click)="showOverlay = true; showEventDeliveriesStatusDropdown = !showEventDeliveriesStatusDropdown"
+			>
+				<img src="/assets/img/status-filter-icon.svg" alt="status filter icon" />
+				<span>Status</span>
+				<img src="/assets/img/angle-arrow-down.svg" alt="arrow down icon" />
+			</button>
+			<div class="dropdown__menu with-padding smaller" [ngClass]="{ show: showEventDeliveriesStatusDropdown }">
+				<div class="dropdown__menu__item with-border" *ngFor="let status of eventDeliveryStatuses">
+					<label [for]="status">{{ status || 'None' }}</label>
+					<input
+						type="checkbox"
+						name="status"
+						[value]="status"
+						[id]="status"
+						[checked]="checkIfEventDeliveryStatusFilterOptionIsSelected(status)"
+						(change)="updateEventDevliveryStatusFilter(status, $event)"
+					/>
+				</div>
+
+				<button
+					class="button button__small button--full-100 button__primary margin-top"
+					(click)="showOverlay = false; showEventDeliveriesStatusDropdown = false; pushEventDeliveryStatusFilters()"
+				>
+					Apply
+				</button>
+			</div>
+		</div>
+
+		<div class="dropdown">
+			<button
+				class="button button__filter button--has-icon icon-right icon-left"
+				[ngClass]="{ active: !!eventDeliveriesApp }"
+				(click)="showOverlay = true; showEventDeliveriesAppsDropdown = !showEventDeliveriesAppsDropdown"
+			>
+				<img src="/assets/img/apps-icon-grey.svg" alt="apps filter icon" />
+				<span>Apps</span>
+				<img src="/assets/img/angle-arrow-down.svg" alt="arrow down icon" />
+			</button>
+			<div class="dropdown__menu large with-padding" [ngClass]="{ show: showEventDeliveriesAppsDropdown }">
+				<div class="input__search">
+					<img src="/assets/img/search-icon.svg" alt="search icon" />
+					<input type="search" placeholder="Search apps here" #eventDelsAppsFilter />
+				</div>
+				<div class="dropdown__menu__item with-border" *ngFor="let app of eventsDelAppsFilter$ | async">
+					<label [for]="app.uid + 'eventDel'">{{ app.name }}</label>
+					<input type="checkbox" name="app" [value]="app.uid" [id]="app.uid + 'eventDel'" [checked]="app.uid === eventDeliveriesApp" (change)="updateAppFilter(app.uid, $event, 'eventDels')" />
+				</div>
+				<p *ngIf="filteredApps?.length === 0">No app to display</p>
+			</div>
+		</div>
+
+		<div class="button__filter active" *ngIf="activeTab === 'event deliveries' && eventDeliveryFilteredByEventId !== ''">
+			Event Filtered
+			<button class="button__clear button--has-icon" (click)="clearEventFilter()">
+				<img src="../../../../assets/img/close-icon.svg" alt="close icon" />
+			</button>
+		</div>
+	</div>
+	<div class="flex">
+		<button
+			class="button button__white button__small margin-right__16px"
+			(click)="clearFilters(activeTab)"
+			[ngClass]="{
+				disabled:
+					(filterEventDeliveriesFilterDateRange.value.startDate == '' || filterEventDeliveriesFilterDateRange.value.endDate == '') &&
+					eventDeliveriesApp == '' &&
+					eventDeliveryFilteredByEventId == '' &&
+					!eventDeliveriesStatusFilterActive
+			}"
+		>
+			Clear Filter
+		</button>
+		<button class="button button__white button__small margin-right__16px">Batch Retry</button>
+		<button class="button button__primary button__small">Apply Filter</button>
+	</div>
+</div>
