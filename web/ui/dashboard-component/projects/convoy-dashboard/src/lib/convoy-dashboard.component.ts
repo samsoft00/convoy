@@ -58,14 +58,16 @@ export class ConvoyDashboardComponent implements OnInit {
 		startDate: [{ value: new Date(new Date().setDate(new Date().getDate() - 30)), disabled: true }],
 		endDate: [{ value: new Date(), disabled: true }]
 	});
-	eventsFilterDateRange: FormGroup = this.formBuilder.group({
-		startDate: [{ value: '', disabled: true }],
-		endDate: [{ value: '', disabled: true }]
-	});
-	eventDeliveriesFilterDateRange: FormGroup = this.formBuilder.group({
-		startDate: [{ value: '', disabled: true }],
-		endDate: [{ value: '', disabled: true }]
-	});
+	// eventsFilterDateRange: FormGroup = this.formBuilder.group({
+	// 	startDate: [{ value: '', disabled: true }],
+	// 	endDate: [{ value: '', disabled: true }]
+	// });
+	eventsFilterDateRange!: { startDate: any; endDate: any };
+	eventDeliveriesFilterDateRange!: { startDate: any; endDate: any };
+	// eventDeliveriesFilterDateRange: FormGroup = this.formBuilder.group({
+	// 	startDate: [{ value: '', disabled: true }],
+	// 	endDate: [{ value: '', disabled: true }]
+	// });
 	selectedEventsFromEventDeliveriesTable: string[] = [];
 	displayedEventDeliveries: { date: string; events: EVENT_DELIVERY[] }[] = [];
 	eventDeliveries!: { pagination: PAGINATION; content: EVENT_DELIVERY[] };
@@ -137,6 +139,28 @@ export class ConvoyDashboardComponent implements OnInit {
 		);
 	}
 
+	// get date range filters from filter component based on active tab
+	getDateRange(dateValues: { startDate: Date; endDate: Date }) {
+		switch (this.activeTab) {
+			case 'events':
+				this.eventsFilterDateRange = dateValues;
+				this.getEvents({ addToURL: true, fromFilter: true });
+				break;
+			case 'event deliveries':
+				this.eventDeliveriesFilterDateRange = dateValues;
+				this.getEventDeliveries({ addToURL: true, fromFilter: true });
+				break;
+			default:
+				break;
+		}
+	}
+
+	// get event deliveries status filters from filter component
+	fetchEventDeliveryStatusFilters(statusFilters: string[]) {
+		this.eventDeliveryFilteredByStatus = statusFilters;
+		this.getEventDeliveries({ addToURL: true, fromFilter: true });
+	}
+
 	async initDashboard() {
 		await this.getGroups();
 		this.getFiltersFromURL();
@@ -184,14 +208,14 @@ export class ConvoyDashboardComponent implements OnInit {
 		if (Object.keys(filters).length == 0) return;
 
 		// for events filters
-		this.eventsFilterDateRange.patchValue({ startDate: filters.eventsStartDate ? new Date(filters.eventsStartDate) : '', endDate: filters.eventsEndDate ? new Date(filters.eventsEndDate) : '' });
+		this.eventsFilterDateRange = { startDate: filters.eventsStartDate ? new Date(filters.eventsStartDate) : '', endDate: filters.eventsEndDate ? new Date(filters.eventsEndDate) : '' };
 		this.eventApp = filters.eventsApp ?? '';
 
 		// for event deliveries filters
-		this.eventDeliveriesFilterDateRange.patchValue({
+		this.eventDeliveriesFilterDateRange = {
 			startDate: filters.eventDelsStartDate ? new Date(filters.eventDelsStartDate) : '',
 			endDate: filters.eventDelsEndDate ? new Date(filters.eventDelsEndDate) : ''
-		});
+		};
 		this.eventDeliveriesApp = filters.eventDelsApp ?? '';
 		this.eventDeliveryFilteredByStatus = filters.eventDelsStatus ? JSON.parse(filters.eventDelsStatus) : [];
 	}
@@ -264,7 +288,7 @@ export class ConvoyDashboardComponent implements OnInit {
 		} catch (error) {}
 	}
 
-	setDateForFilter(requestDetails: { startDate: Date; endDate: Date }) {
+	setDateForFilter(requestDetails: { startDate: Date | number; endDate: Date | number }) {
 		if (!requestDetails.endDate && !requestDetails.startDate) return { startDate: '', endDate: '' };
 		const startDate = requestDetails.startDate ? `${format(requestDetails.startDate, 'yyyy-MM-dd')}T00:00:00` : '';
 		const endDate = requestDetails.endDate ? `${format(requestDetails.endDate, 'yyyy-MM-dd')}T23:59:59` : '';
@@ -298,7 +322,7 @@ export class ConvoyDashboardComponent implements OnInit {
 		if (requestDetails?.appId) this.eventApp = requestDetails.appId;
 		if (requestDetails?.addToURL) this.addFilterToURL({ section: 'events' });
 
-		const { startDate, endDate } = this.setDateForFilter(this.eventsFilterDateRange.value);
+		const { startDate, endDate } = this.setDateForFilter(this.eventsFilterDateRange);
 
 		try {
 			const eventsResponse = await this.convyDashboardService.request({
@@ -363,14 +387,14 @@ export class ConvoyDashboardComponent implements OnInit {
 		const queryParams: any = {};
 
 		if (requestDetails.section === 'events') {
-			const { startDate, endDate } = this.setDateForFilter(this.eventsFilterDateRange.value);
+			const { startDate, endDate } = this.setDateForFilter(this.eventsFilterDateRange);
 			if (startDate) queryParams.eventsStartDate = startDate;
 			if (endDate) queryParams.eventsEndDate = endDate;
 			if (this.eventApp) queryParams.eventsApp = this.eventApp;
 		}
 
 		if (requestDetails.section === 'eventDels') {
-			const { startDate, endDate } = this.setDateForFilter(this.eventDeliveriesFilterDateRange.value);
+			const { startDate, endDate } = this.setDateForFilter(this.eventDeliveriesFilterDateRange);
 			if (startDate) queryParams.eventDelsStartDate = startDate;
 			if (endDate) queryParams.eventDelsEndDate = endDate;
 			if (this.eventDeliveriesApp) queryParams.eventDelsApp = this.eventDeliveriesApp;
@@ -388,7 +412,7 @@ export class ConvoyDashboardComponent implements OnInit {
 		let eventDeliveryStatusFilterQuery = '';
 		this.eventDeliveryFilteredByStatus.length > 0 ? (this.eventDeliveriesStatusFilterActive = true) : (this.eventDeliveriesStatusFilterActive = false);
 		this.eventDeliveryFilteredByStatus.forEach((status: string) => (eventDeliveryStatusFilterQuery += `&status=${status}`));
-		const { startDate, endDate } = this.setDateForFilter(this.eventDeliveriesFilterDateRange.value);
+		const { startDate, endDate } = this.setDateForFilter(this.eventDeliveriesFilterDateRange);
 
 		try {
 			const eventDeliveriesResponse = await this.convyDashboardService.request({
@@ -408,31 +432,31 @@ export class ConvoyDashboardComponent implements OnInit {
 		}
 	}
 
-	updateEventDevliveryStatusFilter(status: string, isChecked: any) {
-		if (isChecked.target.checked) {
-			this.eventDeliveryFilteredByStatus.push(status);
-		} else {
-			let index = this.eventDeliveryFilteredByStatus.findIndex(x => x === status);
-			this.eventDeliveryFilteredByStatus.splice(index, 1);
-		}
-	}
+	// updateEventDevliveryStatusFilter(statusFilter?: {status?: string, isChecked?: any}) {
+	// 	if (statusFilter?.isChecked.target.checked && statusFilter?.status) {
+	// 		this.eventDeliveryFilteredByStatus.push(statusFilter.status);
+	// 	} else {
+	// 		let index = this.eventDeliveryFilteredByStatus.findIndex(x => x === statusFilter?.status);
+	// 		this.eventDeliveryFilteredByStatus.splice(index, 1);
+	// 	}
+	// }
 
-	updateAppFilter(appId: string, isChecked: any, activeSection: 'eventDels' | 'events') {
+	updateAppFilter(appFilter: any) {
 		this.showOverlay = false;
-		activeSection === 'eventDels' ? (this.showEventDeliveriesAppsDropdown = !this.showEventDeliveriesAppsDropdown) : (this.showEventsAppsDropdown = !this.showEventsAppsDropdown);
-		if (isChecked.target.checked) {
-			activeSection === 'eventDels' ? (this.eventDeliveriesApp = appId) : (this.eventApp = appId);
+		appFilter.activeSection === 'eventDels' ? (this.showEventDeliveriesAppsDropdown = !this.showEventDeliveriesAppsDropdown) : (this.showEventsAppsDropdown = !this.showEventsAppsDropdown);
+		if (appFilter.isChecked.target.checked) {
+			appFilter.activeSection === 'eventDels' ? (this.eventDeliveriesApp = appFilter.appId) : (this.eventApp = appFilter.appId);
 		} else {
-			activeSection === 'eventDels' ? (this.eventDeliveriesApp = '') : (this.eventApp = '');
+			appFilter.activeSection === 'eventDels' ? (this.eventDeliveriesApp = '') : (this.eventApp = '');
 		}
-		activeSection === 'eventDels' ? this.getEventDeliveries({ addToURL: true, fromFilter: true }) : this.getEvents({ addToURL: true, fromFilter: true });
+		appFilter.activeSection === 'eventDels' ? this.getEventDeliveries({ addToURL: true, fromFilter: true }) : this.getEvents({ addToURL: true, fromFilter: true });
 	}
 
 	async getEventDeliveries(requestDetails?: { addToURL?: boolean; fromFilter?: boolean }) {
 		this.eventDeliveries && this.eventDeliveries?.pagination?.next === this.eventDeliveriesPage ? (this.isloadingMoreEventDeliveries = true) : (this.isloadingEventDeliveries = true);
 
 		if (requestDetails?.addToURL) this.addFilterToURL({ section: 'eventDels' });
-		const { startDate, endDate } = this.setDateForFilter(this.eventDeliveriesFilterDateRange.value);
+		const { startDate, endDate } = this.setDateForFilter(this.eventDeliveriesFilterDateRange);
 
 		try {
 			const eventDeliveriesResponse = await this.eventDeliveriesRequest({ eventId: this.eventDeliveryFilteredByEventId, startDate, endDate });
@@ -640,14 +664,14 @@ export class ConvoyDashboardComponent implements OnInit {
 			case 'events':
 				this.eventApp = '';
 				filterItems = ['eventsStartDate', 'eventsEndDate', 'eventsApp'];
-				this.eventsFilterDateRange.patchValue({ startDate: '', endDate: '' });
+				// this.eventsFilterDateRange.patchValue({ startDate: '', endDate: '' });
 				this.getEvents({ fromFilter: true });
 				break;
 
 			case 'event deliveries':
 				this.eventDeliveriesApp = '';
 				filterItems = ['eventDelsStartDate', 'eventDelsEndDate', 'eventDelsApp', 'eventDelsStatus'];
-				this.eventDeliveriesFilterDateRange.patchValue({ startDate: '', endDate: '' });
+				// this.eventDeliveriesFilterDateRange.patchValue({ startDate: '', endDate: '' });
 				this.eventDeliveryFilteredByEventId = '';
 				this.eventDeliveryFilteredByStatus = [];
 				this.getEventDeliveries({ fromFilter: true });
@@ -710,9 +734,9 @@ export class ConvoyDashboardComponent implements OnInit {
 		return this.apiURL + url;
 	}
 
-	checkIfEventDeliveryStatusFilterOptionIsSelected(status: string): boolean {
-		return this.eventDeliveryFilteredByStatus?.length > 0 ? this.eventDeliveryFilteredByStatus.includes(status) : false;
-	}
+	// checkIfEventDeliveryStatusFilterOptionIsSelected(status: string): boolean {
+	// 	return this.eventDeliveryFilteredByStatus?.length > 0 ? this.eventDeliveryFilteredByStatus.includes(status) : false;
+	// }
 
 	checkIfEventDeliveryAppFilterOptionIsSelected(appId: string): boolean {
 		return appId === this.eventDeliveriesApp;
