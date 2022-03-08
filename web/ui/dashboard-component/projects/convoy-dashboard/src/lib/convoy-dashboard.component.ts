@@ -66,6 +66,11 @@ export class ConvoyDashboardComponent implements OnInit {
 		startDate: [{ value: '', disabled: true }],
 		endDate: [{ value: '', disabled: true }]
 	});
+	addNewAppForm: FormGroup = this.formBuilder.group({
+		events: [{ value: '', disabled: true }],
+		url: [{ value: '', disabled: true }],
+		description: [{ value: '', disabled: true }]
+	});
 	selectedEventsFromEventDeliveriesTable: string[] = [];
 	displayedEventDeliveries: { date: string; events: EVENT_DELIVERY[] }[] = [];
 	eventDeliveries!: { pagination: PAGINATION; content: EVENT_DELIVERY[] };
@@ -78,6 +83,9 @@ export class ConvoyDashboardComponent implements OnInit {
 	dateOptions = ['Last Year', 'Last Month', 'Last Week', 'Yesterday'];
 	eventDeliveryFilteredByStatus: string[] = [];
 	showOverlay = false;
+	showAddEventModal = false;
+	showCreateAppModal = false;
+	showAddEndpointModal = false;
 	showBatchRetryModal = false;
 	showEventDeliveriesStatusDropdown = false;
 	showEventDeliveriesAppsDropdown = false;

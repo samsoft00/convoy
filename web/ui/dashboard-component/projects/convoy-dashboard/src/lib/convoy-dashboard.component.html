@@ -321,9 +321,7 @@
 								<img src="/assets/img/enter-icon.png" alt="enter icon" />
 							</button>
 						</form>
-						<button class="button button__primary button__small">
-							Create App
-						</button>
+						<button class="button button__primary button__small" (click)="showCreateAppModal = !showCreateAppModal">Create App</button>
 					</div>
 				</div>
 			</div>
@@ -575,17 +573,28 @@
 							</li>
 						</ul>
 
-						<h4>App Event Endpoints</h4>
+						<div class="flex flex__align-items-center flex__justify-between">
+							<h4>App Event Endpoints</h4>
+
+							<button class="button__clear button--has-icon icon-left" (click)="showAddEndpointModal = !showAddEndpointModal">
+								<img src="/assets/img/add-icon.svg" alt="link out" />
+								Add Endpoints
+							</button>
+						</div>
 						<ul class="dashboard--logs--details--endpoints">
 							<ng-container *ngIf="appsDetailsItem?.endpoints">
 								<li *ngFor="let endpoint of appsDetailsItem.endpoints">
 									<h5>{{ endpoint.description }}</h5>
 									<p>
-										<img src="/assets/img/link-icon.svg" alt="link icon" />
+										<img src="/a ssets/img/link-icon.svg" alt="link icon" />
 										{{ endpoint.target_url }}
 									</p>
 									<div class="events">
 										<div class="tag" *ngFor="let event of endpoint.events">{{ event == '*' ? 'all events' : event }}</div>
+										<button class="button button__white button__small button--has-icon icon-left font__12px" (click)="showAddEventModal = !showAddEventModal">
+											<img src="/assets/img/add-icon.svg" alt="link out" />
+											Add Event
+										</button>
 									</div>
 								</li>
 							</ng-container>
@@ -697,8 +706,16 @@
 	</div>
 </div>
 
-<div class="overlay" *ngIf="showOverlay" (click)="showOverlay = false; showEventDeliveriesStatusDropdown = false; showEventDeliveriesAppsDropdown = false; showEventsAppsDropdown = false; showDateFilterDropdown = false"></div>
-<div class="_overlay" *ngIf="showBatchRetryModal"></div>
+<div
+	class="overlay"
+	*ngIf="showOverlay"
+	(click)="showOverlay = false; showEventDeliveriesStatusDropdown = false; showEventDeliveriesAppsDropdown = false; showEventsAppsDropdown = false; showDateFilterDropdown = false"
+></div>
+<div
+	class="_overlay"
+	*ngIf="showBatchRetryModal || showCreateAppModal || showAddEndpointModal"
+	(click)="showCreateAppModal = false; showBatchRetryModal = false; showAddEndpointModal = false; showAddEventModal = false"
+></div>
 <div class="modal modal__center large" *ngIf="showBatchRetryModal">
 	<div class="modal--head">
 		<h2 class="font__weight-600">Batch Retry</h2>
@@ -746,7 +763,11 @@
 					<input type="text" placeholder="Time" step="900" onfocus="this.type='time'" />
 				</button>
 				<div class="dropdown">
-					<button class="button button__filter button--has-icon icon-right icon-left" [ngClass]="{ active: !!eventApp }" (click)="showOverlay = true; showBatchRetryEventsAppsDropdown = !showBatchRetryEventsAppsDropdown">
+					<button
+						class="button button__filter button--has-icon icon-right icon-left"
+						[ngClass]="{ active: !!eventApp }"
+						(click)="showOverlay = true; showBatchRetryEventsAppsDropdown = !showBatchRetryEventsAppsDropdown"
+					>
 						<img src="/assets/img/apps-icon-grey.svg" alt="apps filter icon" />
 						<span>All Apps</span>
 						<img src="/assets/img/angle-arrow-down.svg" class="right-image" alt="arrow down icon" />
@@ -861,15 +882,110 @@
 		<div class="alert alert__info margin-top__32px">
 			<img src="/assets/img/ideas.svg" alt="idea" />
 			<div>
-				The filters applied will affect <span class="font__weight-600">345</span> events.
+				The filters applied will affect
+				<span class="font__weight-600">345</span>
+				events.
 			</div>
 		</div>
 	</div>
-	<div class="modal--footer modal__footer__with-shadow">
+	<div class="modal--footer modal--footer__with-shadow">
 		<div></div>
 		<div class="flex">
 			<button class="button button__white margin-right__20px" (click)="showBatchRetryModal = false">Discard</button>
 			<button class="button button__primary">Batch Retry</button>
 		</div>
+	</div>
+</div>
+<!-- create app, add new endpoint, add event modals  -->
+<div class="modal modal__right" *ngIf="showCreateAppModal || showAddEndpointModal || showAddEventModal">
+	<div class="modal--head" *ngIf="showCreateAppModal">
+		<h2>Create App</h2>
+		<a (click)="showCreateAppModal = false">
+			<img src="/assets/img/modal-close-icon.svg" alt="close icon" />
+		</a>
+	</div>
+	<div class="modal--head" *ngIf="showAddEndpointModal">
+		<h2>Add Endpoint</h2>
+		<a (click)="showAddEndpointModal = false">
+			<img src="/assets/img/modal-close-icon.svg" alt="close icon" />
+		</a>
+	</div>
+	<div class="modal--head" *ngIf="showAddEventModal">
+		<h2>Add Event</h2>
+		<a (click)="showAddEventModal = false">
+			<img src="/assets/img/modal-close-icon.svg" alt="close icon" />
+		</a>
+	</div>
+
+	<div class="modal--body" *ngIf="showCreateAppModal">
+		<form action="">
+			<div class="input">
+				<label for="">Enter App Name</label>
+				<input type="text" />
+			</div>
+			<div class="input">
+				<label for="">Support Email</label>
+				<input type="text" />    
+				<div class="input__error__secondary font__12px">
+					<img src="/assets/img/info-icon.svg" alt="close icon" />
+					Add multiple event by seperating them with commas
+				</div>
+			</div>
+			<div class="input">
+				<label for="">Enter App Name</label>
+				<input type="text" />
+			</div>
+			<div class="input">
+				<label for="">Enter App Name</label>
+				<input type="text" />
+			</div>
+		</form>
+	</div>
+	<div class="modal--body" *ngIf="showAddEndpointModal">
+		<form action="">
+			<div class="input">
+				<label for="">Events</label>
+				<input type="text">
+			</div>
+			<div class="input">
+				<label for="">Enter URL</label>
+				<input type="text">
+			</div>
+
+			<div class="input">
+				<label for="">Description</label>
+				<input type="text">
+			</div>
+		</form>
+	</div>
+	<div class="modal--body" *ngIf="showAddEventModal">
+		<form action="">
+			<div class="input">
+				<label for="">App ID</label>
+				<select name="" id="">
+					<option value=""></option>
+				</select>
+			</div>
+			<div class="input">
+				<label for="">Data</label>
+				<input type="text" />
+			</div>
+			<div class="input">
+				<label for="">Event Type</label>
+				<input type="text" />
+			</div>
+		</form>
+	</div>
+	<div class="modal--footer modal--footer__with-shadow" *ngIf="showCreateAppModal">
+		<button class="button button__white" (click)="showCreateAppModal = false">Cancel</button>
+		<button class="button button__primary">Continue</button>
+	</div>
+	<div class="modal--footer modal--footer__with-shadow" *ngIf="showAddEndpointModal">
+		<button class="button button__white" (click)="showAddEndpointModal = false">Discard</button>
+		<button class="button button__primary">Add Endpoint</button>
+	</div>
+	<div class="modal--footer modal--footer__with-shadow" *ngIf="showAddEventModal">
+		<button class="button button__white" (click)="showAddEventModal = false">Cancel</button>
+		<button class="button button__primary">Continue</button>
 	</div>
 </div>
