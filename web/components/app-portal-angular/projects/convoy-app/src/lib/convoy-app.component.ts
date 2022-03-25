@@ -331,9 +331,7 @@ export class ConvoyAppComponent implements OnInit {
 		});
 		try {
 			const response = await this.convyAppService.request({
-				url: this.getAPIURL(
-					`/apps/endpoints`
-				),
+				url: this.getAPIURL(`/apps/endpoints`),
 				method: 'post',
 				body: this.addNewEndpointForm.value,
 				token: this.token
@@ -429,6 +427,36 @@ export class ConvoyAppComponent implements OnInit {
 		}
 	}
 
+	// force retry successful events
+	async forceRetryEvent(requestDetails: { e: any; index: number; eventDeliveryId: string }) {
+		requestDetails.e.stopPropagation();
+		const retryButton: any = document.querySelector(`#event${requestDetails.index} button`);
+		if (retryButton) {
+			retryButton.classList.add(['spin', 'disabled']);
+			retryButton.disabled = true;
+		}
+		const payload = {
+			ids: [requestDetails.eventDeliveryId]
+		};
+		try {
+			await this.convyAppService.request({
+				method: 'put',
+				url: this.getAPIURL(`/eventdeliveries/forceresend`),
+				body: payload,
+				token: this.token
+			});
+
+			this.convyAppService.showNotification({ message: 'Force Retry Request Sent' });
+			retryButton.classList.remove(['spin', 'disabled']);
+			retryButton.disabled = false;
+			this.getEventDeliveries();
+		} catch (error: any) {
+			this.convyAppService.showNotification({ message: error.error.message });
+			retryButton.classList.remove(['spin', 'disabled']);
+			retryButton.disabled = false;
+			return error;
+		}
+	}
 	async batchRetryEvent() {
 		let eventDeliveryStatusFilterQuery = '';
 		let eventDeliveriesStatusFilterActive = false;
@@ -574,8 +602,6 @@ export class ConvoyAppComponent implements OnInit {
 		await this.initDashboard();
 		this.toggleActiveTab('event deliveries');
 	}
-
-	
 
 	addTag() {
 		const addTagInput = document.getElementById('tagInput');

@@ -424,18 +424,16 @@
 									<td>
 										<div>
 											<button
-												[disabled]="event.status === 'Success' || event.status === 'Scheduled'"
-												[class]="'button__retry button--has-icon icon-left ' + (event.status === 'Success' || event.status === 'Scheduled' ? 'disabled' : '')"
+												[disabled]="event.status !== 'Success' && event.status !== 'Failure'"
+												class="button__retry button--has-icon icon-left"
 												(click)="
-													retryEvent({
-														e: $event,
-														index: this.index,
-														eventDeliveryId: event.uid
-													})
+													event.status === 'Success'
+														? forceRetryEvent({ e: $event, index: this.index, eventDeliveryId: event.uid })
+														: retryEvent({ e: $event, index: this.index, eventDeliveryId: event.uid })
 												"
 											>
 												<img src="/assets/img/refresh-icon-primary.svg" alt="refresh icon" />
-												Retry
+												{{ event.status === 'Success' ? 'Force Retry' : 'Retry' }}
 											</button>
 										</div>
 									</td>
@@ -549,7 +547,7 @@
 </div>
 
 <div class="overlay" *ngIf="showOverlay" (click)="showOverlay = false; showEventDeliveriesStatusDropdown = false; showEventFilterCalendar = false"></div>
-<div class="_overlay" *ngIf="showBatchRetryModal || showAddEndpointModal" (click)="showBatchRetryModal = false; showAddEndpointModal = false;"></div>
+<div class="_overlay" *ngIf="showBatchRetryModal || showAddEndpointModal" (click)="showBatchRetryModal = false; showAddEndpointModal = false"></div>
 <div class="modal modal__center" *ngIf="showBatchRetryModal">
 	<div class="modal--body flex flex__column flex__justify-center flex__align-items-center delete">
 		<img src="assets/img/filter.gif" alt="filter icon" class="filter-img" />
