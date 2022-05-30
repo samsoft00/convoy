@@ -16,6 +16,10 @@ export interface GROUP {
 		};
 		DisableEndpoint: boolean;
 	};
+	statistics: {
+		messages_sent: number;
+		total_apps: number;
+	};
 	created_at: Date;
 	updated_at: Date;
 }
