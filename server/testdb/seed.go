@@ -68,8 +68,6 @@ func SeedMultipleApplications(db datastore.DatabaseClient, g *datastore.Group, c
 func SeedEndpoint(db datastore.DatabaseClient, app *datastore.Application, groupID string, events []string) (*datastore.Endpoint, error) {
 	endpoint := &datastore.Endpoint{
 		UID:            uuid.New().String(),
-		Events:         events,
-		Status:         datastore.ActiveEndpointStatus,
 		DocumentStatus: datastore.ActiveDocumentStatus,
 	}
 
@@ -89,8 +87,6 @@ func SeedMultipleEndpoints(db datastore.DatabaseClient, app *datastore.Applicati
 	for i := 0; i < count; i++ {
 		endpoint := &datastore.Endpoint{
 			UID:            uuid.New().String(),
-			Events:         events,
-			Status:         datastore.ActiveEndpointStatus,
 			DocumentStatus: datastore.ActiveDocumentStatus,
 		}
 
@@ -234,28 +230,11 @@ func SeedEventDelivery(db datastore.DatabaseClient, app *datastore.Application, 
 	}
 
 	eventDelivery := &datastore.EventDelivery{
-		UID: uid,
-		EventMetadata: &datastore.EventMetadata{
-			UID:       event.UID,
-			EventType: event.EventType,
-		},
-		EndpointMetadata: &datastore.EndpointMetadata{
-			UID:               endpoint.UID,
-			TargetURL:         endpoint.TargetURL,
-			Status:            endpoint.Status,
-			Secret:            endpoint.Secret,
-			HttpTimeout:       endpoint.HttpTimeout,
-			RateLimit:         endpoint.RateLimit,
-			RateLimitDuration: endpoint.RateLimitDuration,
-			Sent:              false,
-		},
-		Status: status,
-		AppMetadata: &datastore.AppMetadata{
-			UID:          app.UID,
-			Title:        app.Title,
-			GroupID:      groupID,
-			SupportEmail: app.SupportEmail,
-		},
+		UID:            uid,
+		EventID:        event.UID,
+		EndpointID:     endpoint.UID,
+		Status:         status,
+		AppID:          app.UID,
 		CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
 		UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
 		DocumentStatus: datastore.ActiveDocumentStatus,

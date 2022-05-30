@@ -62,6 +62,15 @@ type ApplicationRepository interface {
 	UpdateApplicationEndpointsStatus(context.Context, string, []string, EndpointStatus) error
 }
 
+type SubscriptionRepository interface {
+	CreateSubscription(context.Context, string, *Subscription) error
+	UpdateSubscription(context.Context, string, *Subscription) error
+	LoadSubscriptionsPaged(context.Context, string, Pageable) ([]Subscription, PaginationData, error)
+	DeleteSubscription(context.Context, string, *Subscription) error
+	FindSubscriptionByID(context.Context, string, string) (*Subscription, error)
+	FindSubscriptionByEventType(context.Context, string, string, EventType) ([]Subscription, error)
+}
+
 type SourceRepository interface {
 	CreateSource(context.Context, *Source) error
 	UpdateSource(ctx context.Context, groupID string, source *Source) error
