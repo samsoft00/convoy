@@ -8,6 +8,8 @@ import { ProjectsService } from './projects.service';
 	styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
+	isLoadingProjects: boolean = false;
+	groupsLoaderIndex: number[] = [0, 1, 2, 3, 4];
 	projects!: GROUP[];
 	constructor(private projectsService: ProjectsService) {}
 
