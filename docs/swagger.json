@@ -5077,23 +5077,6 @@
                 }
             }
         },
-        "datastore.AppMetadata": {
-            "type": "object",
-            "properties": {
-                "group_id": {
-                    "type": "string"
-                },
-                "support_email": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
         "datastore.Application": {
             "type": "object",
             "properties": {
@@ -5237,8 +5220,8 @@
         "datastore.Event": {
             "type": "object",
             "properties": {
-                "app_metadata": {
-                    "$ref": "#/definitions/datastore.AppMetadata"
+                "app_id": {
+                    "type": "string"
                 },
                 "created_at": {
                     "type": "string"
@@ -5256,11 +5239,17 @@
                 "event_type": {
                     "type": "string"
                 },
+                "group_id": {
+                    "type": "string"
+                },
                 "matched_endpoints": {
                     "type": "integer"
                 },
                 "provider_id": {
                     "description": "ProviderID is a custom ID that can be used to reconcile this Event\nwith your internal systems.\nThis is optional\nIf not provided, we will generate one for you",
+                    "type": "string"
+                },
+                "source_id": {
                     "type": "string"
                 },
                 "uid": {

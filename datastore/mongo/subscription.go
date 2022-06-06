@@ -135,3 +135,37 @@ func (s *subscriptionRepo) FindSubscriptionByEventType(ctx context.Context, grou
 
 	return subscription, nil
 }
+
+func (s *subscriptionRepo) FindSubscriptionBySourceIDs(ctx context.Context, groupId string, sourceId string) ([]datastore.Subscription, error) {
+	var subscription []datastore.Subscription
+	filter := bson.M{"group_id": groupId, "source_id": sourceId, "document_status": datastore.ActiveDocumentStatus}
+
+	c, err := s.client.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.All(ctx, &subscription)
+	if err != nil {
+		return nil, err
+	}
+
+	return subscription, nil
+}
+
+func (s *subscriptionRepo) UpdateSubscriptionStatus(ctx context.Context, groupId string, subscriptionId string, status datastore.SubscriptionStatus) error {
+	filter := bson.M{
+		"uid":             subscriptionId,
+		"group_id":        groupId,
+		"document_status": datastore.ActiveDocumentStatus,
+	}
+
+	updatedAt := primitive.NewDateTimeFromTime(time.Now())
+	update := bson.D{primitive.E{Key: "$set", Value: bson.D{
+		primitive.E{Key: "status", Value: status},
+		primitive.E{Key: "updated_at", Value: updatedAt},
+	}}}
+
+	_, err := s.client.UpdateOne(ctx, filter, update)
+	return err
+}

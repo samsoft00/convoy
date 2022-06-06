@@ -119,9 +119,9 @@ var (
 )
 
 const (
-	ActiveEndpointStatus   EndpointStatus = "active"
-	InactiveEndpointStatus EndpointStatus = "inactive"
-	PendingEndpointStatus  EndpointStatus = "pending"
+	ActiveSubscriptionStatus   SubscriptionStatus = "active"
+	InactiveSubscriptionStatus SubscriptionStatus = "inactive"
+	PendingSubscriptionStatus  SubscriptionStatus = "pending"
 )
 
 type Application struct {
@@ -143,7 +143,7 @@ type Application struct {
 	DocumentStatus DocumentStatus `json:"-" bson:"document_status"`
 }
 
-type EndpointStatus string
+type SubscriptionStatus string
 
 type Endpoint struct {
 	UID         string `json:"uid" bson:"uid"`
@@ -274,12 +274,13 @@ type Event struct {
 	// This is optional
 	// If not provided, we will generate one for you
 	ProviderID string `json:"provider_id" bson:"provider_id"`
+	SourceID   string `json:"source_id" bson:"source_id"`
+	GroupID    string `json:"group_id" bson:"group_id"`
+	AppID      string `json:"app_id" bson:"app_id"`
 
 	// Data is an arbitrary JSON value that gets sent as the body of the
 	// webhook to the endpoints
 	Data json.RawMessage `json:"data" bson:"data"`
-
-	AppMetadata *AppMetadata `json:"app_metadata,omitempty" bson:"app_metadata"`
 
 	CreatedAt primitive.DateTime `json:"created_at,omitempty" bson:"created_at,omitempty" swaggertype:"string"`
 	UpdatedAt primitive.DateTime `json:"updated_at,omitempty" bson:"updated_at,omitempty" swaggertype:"string"`
@@ -341,18 +342,6 @@ func (em Metadata) Value() (driver.Value, error) {
 
 	return driver.Value(b.String()), nil
 }
-
-// type EndpointMetadata struct {
-// 	UID               string         `json:"uid" bson:"uid"`
-// 	TargetURL         string         `json:"target_url" bson:"target_url"`
-// 	Status            EndpointStatus `json:"status" bson:"status"`
-// 	Secret            string         `json:"secret" bson:"secret"`
-// 	HttpTimeout       string         `json:"http_timeout" bson:"http_timeout"`
-// 	RateLimit         int            `json:"rate_limit" bson:"rate_limit"`
-// 	RateLimitDuration string         `json:"rate_limit_duration" bson:"rate_limit_duration"`
-
-// 	Sent bool `json:"sent" bson:"sent"`
-// }
 
 type EventIntervalData struct {
 	Interval int64  `json:"index" bson:"index"`
@@ -437,7 +426,7 @@ type Subscription struct {
 	UID        string             `json:"uid" bson:"uid"`
 	Name       string             `json:"name" bson:"name"`
 	Type       string             `json:"type" bson:"type"`
-	Status     EndpointStatus     `json:"status" bson:"status"`
+	Status     SubscriptionStatus `json:"status" bson:"status"`
 	AppID      string             `json:"-" bson:"app_id"`
 	GroupID    string             `json:"-" bson:"group_id"`
 	SourceID   string             `json:"-" bson:"source_id"`

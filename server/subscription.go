@@ -32,7 +32,7 @@ func (a *applicationHandler) GetSubscriptions(w http.ResponseWriter, r *http.Req
 	apps, paginationData, err := a.subService.LoadSubscriptionsPaged(r.Context(), group.UID, pageable)
 	if err != nil {
 		log.WithError(err).Error("failed to load subscriptions")
-		_ = render.Render(w, r, newErrorResponse("an error occurred while fetching subscriptions. Error: "+err.Error(), http.StatusBadRequest))
+		_ = render.Render(w, r, newServiceErrResponse(err))
 		return
 	}
 
@@ -58,22 +58,19 @@ func (a *applicationHandler) GetSubscription(w http.ResponseWriter, r *http.Requ
 
 	subscription, err := a.subService.FindSubscriptionByID(r.Context(), group.UID, subId)
 	if err != nil {
-		log.WithError(err).Error("failed to load subscriptions")
-		_ = render.Render(w, r, newErrorResponse("an error occurred while fetching subscriptions. Error: "+err.Error(), http.StatusBadRequest))
+		_ = render.Render(w, r, newServiceErrResponse(err))
 		return
 	}
 
-	source, err := a.sourceRepo.FindSourceByID(r.Context(), group.UID, subscription.SourceID)
+	source, err := a.sourceService.FindSourceByID(r.Context(), group, subscription.SourceID)
 	if err != nil {
-		log.WithError(err).Error("failed to load subscriptions")
-		_ = render.Render(w, r, newErrorResponse("an error occurred while fetching subscriptions. Error: "+err.Error(), http.StatusBadRequest))
+		_ = render.Render(w, r, newServiceErrResponse(err))
 		return
 	}
 
 	endpoint, err := a.appRepo.FindApplicationEndpointByID(r.Context(), subscription.AppID, subscription.EndpointID)
 	if err != nil {
-		log.WithError(err).Error("failed to load subscriptions")
-		_ = render.Render(w, r, newErrorResponse("an error occurred while fetching subscriptions. Error: "+err.Error(), http.StatusBadRequest))
+		_ = render.Render(w, r, newServiceErrResponse(err))
 		return
 	}
 
@@ -164,16 +161,13 @@ func (a *applicationHandler) UpdateSubscription(w http.ResponseWriter, r *http.R
 	var update models.UpdateSubscription
 	err := util.ReadJSON(r, &update)
 	if err != nil {
+		log.WithError(err).Error(err.Error())
 		_ = render.Render(w, r, newErrorResponse(err.Error(), http.StatusBadRequest))
 		return
 	}
 
 	g := getGroupFromContext(r.Context())
-	subscription, err := a.subService.FindSubscriptionByID(r.Context(), g.UID, chi.URLParam(r, "subscriptionID"))
-	if err != nil {
-		_ = render.Render(w, r, newServiceErrResponse(err))
-		return
-	}
+	subscription := chi.URLParam(r, "subscriptionID")
 
 	sub, err := a.subService.UpdateSubscription(r.Context(), g.UID, subscription, &update)
 	if err != nil {
