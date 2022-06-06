@@ -413,16 +413,6 @@ func buildRoutes(app *applicationHandler) http.Handler {
 			})
 		})
 
-        portalRouter.Route("/subscriptions", func(subsriptionRouter chi.Router) {
-            subsriptionRouter.Use(requireAppPortalApplication(app.appRepo))
-			subsriptionRouter.Use(requireAppPortalPermission(auth.RoleUIAdmin))
-
-            subsriptionRouter.Post("/", app.CreateSubscription)
-            subsriptionRouter.With(pagination).Get("/", app.GetSubscriptions)
-            subsriptionRouter.Delete("/", app.DeleteSubscription)
-            subsriptionRouter.Get("/{subscriptionID}", app.GetSubscription)
-            subsriptionRouter.Put("/{subscriptionID}", app.UpdateSubscription)
-        })
 	})
 
 	router.Handle("/v1/metrics", promhttp.Handler())
