@@ -17,6 +17,7 @@ export class CreateProjectComponent implements OnInit {
 		{ id: 'linear', type: 'Linear time retry' },
 		{ id: 'exponential', type: 'Exponential time backoff' }
 	];
+<<<<<<< HEAD
 	isCreatingProject = false;
 	projectType: 'incoming' | 'outgoing' = 'outgoing';
 	projectForm: FormGroup = this.formBuilder.group({
@@ -66,6 +67,18 @@ export class CreateProjectComponent implements OnInit {
 		}
 	}
 
+=======
+	projectType: 'incoming' | 'outgoing' = 'outgoing';
+
+	constructor(private router: Router) {}
+
+	ngOnInit(): void {}
+
+	async createProject(newProjectData: GROUP) {
+		newProjectData.type === 'incoming' ? (this.projectStage = 'createSource') : (this.projectStage = 'createApplication');
+	}
+
+>>>>>>> 3f0c87c7b6ef8fbf12b3b139e7eab91502f64e62
 	toggleActiveStage() {}
 
 	cancel() {
